@@ -1,0 +1,215 @@
+{
+	"name": "PL_Source_To_Silver_Inner",
+	"properties": {
+		"activities": [
+			{
+				"name": "Detail Table Info",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select * from ctrl.table_config WHERE table_id='@{pipeline().parameters.table_id}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Set Curr Time",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "Set Time",
+					"value": {
+						"value": "@formatDateTime(utcNow(),'yyyy-MM-dd_hh-mm-ss')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Source To Landing Ingestion",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Detail Table Info",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Curr Time",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "PostgreSqlV2Source",
+						"query": {
+							"value": "Select * from public.@{activity('Detail Table Info').output.firstRow.source_table_name}",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_Postgess",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ADLS",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "landing",
+							"folder": {
+								"value": "@concat(\n    activity('Detail Table Info').output.firstRow.source_system,\n    '/',\n    activity('Detail Table Info').output.firstRow.  source_table_name,\n    '/',\n    variables('Set Time')\n)",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Landing to Bronze",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Source To Landing Ingestion",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/HealthCare_Project_Repo/Healthcare_Databricks_Repo/landing_To_Bronze",
+					"baseParameters": {
+						"source_system": {
+							"value": "@activity('Detail Table Info').output.firstRow.source_system\r\n\r\n\r\n\r\n\r\n\r\n\r\n",
+							"type": "Expression"
+						},
+						"table_name": {
+							"value": "@activity('Detail Table Info').output.firstRow.bronze_table_name\n\n\n\n\n",
+							"type": "Expression"
+						},
+						"landing_timestamp": {
+							"value": "@variables('Set Time')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_Databrick",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Bronze to silver",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Landing to Bronze",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/HealthCare_Project_Repo/Healthcare_Databricks_Repo/bronze_to_silver",
+					"baseParameters": {
+						"table_name": {
+							"value": "@activity('Detail Table Info').output.firstRow.silver_table_name\n\n\n\n\n",
+							"type": "Expression"
+						},
+						"landing_timestamp": {
+							"value": "@variables('Set Time')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_Databrick",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"table_id": {
+				"type": "string",
+				"defaultValue": "1"
+			}
+		},
+		"variables": {
+			"Set Time": {
+				"type": "String"
+			}
+		},
+		"annotations": []
+	}
+}
