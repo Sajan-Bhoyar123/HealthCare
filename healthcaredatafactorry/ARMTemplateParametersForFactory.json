@@ -8,18 +8,6 @@
 		"LS_ADLS_properties_typeProperties_url": {
 			"value": "https://healthcarestorageacount.dfs.core.windows.net/"
 		},
-		"LS_Postgress_properties_typeProperties_server": {
-			"value": "ep-wandering-mode-b59g4kw2-pooler.c-7.us-east-2.aws.neon.tech"
-		},
-		"LS_Postgress_properties_typeProperties_database": {
-			"value": "neondb"
-		},
-		"LS_Postgress_properties_typeProperties_username": {
-			"value": "neondb_owner"
-		},
-		"LS_Key_Vault_properties_typeProperties_baseUrl": {
-			"value": "https://HealthcareKeyVauult.vault.azure.net/"
-		},
 		"LS_AzureSqlDatabase_properties_typeProperties_server": {
 			"value": "healthcare-serverr.database.windows.net"
 		},
@@ -31,6 +19,18 @@
 		},
 		"LS_Databrick_properties_typeProperties_existingClusterId": {
 			"value": "1101-121845-n2m3ctqz"
+		},
+		"LS_Key_Vault_properties_typeProperties_baseUrl": {
+			"value": "https://HealthcareKeyVauult.vault.azure.net/"
+		},
+		"LS_Postgress_properties_typeProperties_server": {
+			"value": "ep-wandering-mode-b59g4kw2-pooler.c-7.us-east-2.aws.neon.tech"
+		},
+		"LS_Postgress_properties_typeProperties_database": {
+			"value": "neondb"
+		},
+		"LS_Postgress_properties_typeProperties_username": {
+			"value": "neondb_owner"
 		}
 	}
 }
