@@ -48,66 +48,6 @@
 				}
 			},
 			{
-				"name": "Source To Landing Ingestion",
-				"type": "Copy",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "PostgreSqlV2Source",
-						"query": {
-							"value": "select * from PUBLIC.@{activity('Detail Table Info').output.firstRow.source_table_name}\n@{\n    if(equals(activity('Detail Table Info').output.firstRow.load_type, 'FULL')\n        ,\n        '',\n        concat(\n            'where ',activity('Detail Table Info').output.firstRow.watermark_column ,' > ','''',variables('Watermark Value'),''''\n        )\n    )\n}",
-							"type": "Expression"
-						},
-						"queryTimeout": "02:00:00"
-					},
-					"sink": {
-						"type": "ParquetSink",
-						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings"
-						},
-						"formatSettings": {
-							"type": "ParquetWriteSettings"
-						}
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "DS_Postgess",
-						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "DS_ADLS",
-						"type": "DatasetReference",
-						"parameters": {
-							"container": "landing",
-							"folder": {
-								"value": "@concat(\n    activity('Detail Table Info').output.firstRow.source_system,\n    '/',\n    activity('Detail Table Info').output.firstRow.  source_table_name,\n    '/',\n    variables('Set Time')\n)",
-								"type": "Expression"
-							}
-						}
-					}
-				]
-			},
-			{
 				"name": "Landing to Bronze",
 				"type": "DatabricksNotebook",
 				"dependsOn": [
