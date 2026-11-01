@@ -199,7 +199,7 @@
 				}
 			},
 			{
-				"name": "Update Failed Status_copy1",
+				"name": "Update Success Status_copy1",
 				"type": "Script",
 				"dependsOn": [
 					{
