@@ -182,7 +182,7 @@
 							}
 						},
 						{
-							"name": "Gold Notebook Failed",
+							"name": "Update Pipeline as Failed",
 							"type": "Fail",
 							"dependsOn": [
 								{
@@ -194,7 +194,7 @@
 							],
 							"userProperties": [],
 							"typeProperties": {
-								"message": "Inner Pipeline Failed",
+								"message": "Gold Notebook Failed",
 								"errorCode": "500"
 							}
 						}
