@@ -1,0 +1,12 @@
+{
+	"name": "healthcaredatafactorry",
+	"properties": {
+		"globalParameters": {
+			"email_receipent": {
+				"type": "string",
+				"value": "sajanbhoyar25@gmail.com"
+			}
+		}
+	},
+	"location": "centralindia"
+}
